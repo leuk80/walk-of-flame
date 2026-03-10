@@ -1,0 +1,72 @@
+---
+import FlameBadge from './FlameBadge.astro';
+import { getFlameLevel } from '../data/config';
+
+interface Props {
+  title: string;
+  description: string;
+  flameLevel: number;
+  slug: string;
+  prepTime?: string;
+  totalTime: string;
+  servings: number;
+  scoville: string;
+  category: string;
+  image?: string;
+}
+
+const { title, description, flameLevel, slug, totalTime, servings, scoville, category, image } = Astro.props;
+const flame = getFlameLevel(flameLevel);
+---
+
+<article class="card-hover group">
+  <a href={`/rezepte/${slug}`} class="block bg-coal-700/30 rounded-2xl overflow-hidden border border-coal-600/20 hover:border-flame-500/20 transition-all duration-300">
+    {/* Image / Gradient Header */}
+    <div class="relative h-48 overflow-hidden" style={`background: linear-gradient(135deg, ${flame.color}15, ${flame.color}05, transparent)`}>
+      {image ? (
+        <img src={image} alt={title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+      ) : (
+        <div class="w-full h-full flex items-center justify-center">
+          <span class="text-6xl opacity-60 group-hover:scale-110 transition-transform duration-300">🌶️</span>
+        </div>
+      )}
+
+      {/* Flame badge overlay */}
+      <div class="absolute top-3 right-3">
+        <FlameBadge level={flameLevel} showName={false} size="sm" />
+      </div>
+
+      {/* Category tag */}
+      <div class="absolute bottom-3 left-3">
+        <span class="text-[10px] font-mono tracking-wider uppercase bg-coal-900/70 backdrop-blur-sm text-coal-100 px-2 py-1 rounded">
+          {category}
+        </span>
+      </div>
+    </div>
+
+    {/* Content */}
+    <div class="p-5">
+      <h3 class="font-display font-bold text-lg text-coal-50 mb-2 group-hover:text-flame-400 transition-colors leading-tight">
+        {title}
+      </h3>
+      <p class="text-sm text-coal-200 leading-relaxed line-clamp-2 mb-4">
+        {description}
+      </p>
+
+      {/* Meta */}
+      <div class="flex items-center gap-4 text-xs text-coal-200">
+        <span class="flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-width="2" d="M12 6v6l4 2"/></svg>
+          {totalTime}
+        </span>
+        <span class="flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          {servings}
+        </span>
+        <span class="font-mono text-flame-400" style={`color: ${flame.color}`}>
+          {scoville}
+        </span>
+      </div>
+    </div>
+  </a>
+</article>

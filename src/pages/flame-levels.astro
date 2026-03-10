@@ -1,0 +1,70 @@
+---
+import Base from '../layouts/Base.astro';
+import FlameBadge from '../components/FlameBadge.astro';
+import { getCollection } from 'astro:content';
+import { flameLevels } from '../data/config';
+
+const allRecipes = await getCollection('recipes');
+const countByLevel = flameLevels.map(f => ({
+  ...f,
+  count: allRecipes.filter(r => r.data.flameLevel === f.level).length,
+}));
+---
+
+<Base title="Flame Levels" description="Das Flame-Level-System: 5 Stufen der Schärfe von mild bis infernal. Basierend auf der Scoville-Skala.">
+  <section class="max-w-4xl mx-auto px-4 sm:px-6 pt-12 pb-8">
+    <p class="font-mono text-xs text-flame-500 tracking-wider uppercase mb-2">Das System</p>
+    <h1 class="font-display font-bold text-4xl sm:text-5xl text-coal-50 mb-4">
+      <span class="text-flame-gradient">Flame Levels</span>
+    </h1>
+    <p class="text-lg text-coal-200 max-w-2xl leading-relaxed">
+      Jedes Rezept auf Walk of Flame bekommt ein Level von 1 bis 5.
+      Basierend auf der Scoville-Skala, aber vereinfacht und gamifiziert.
+      Wie weit kommst du?
+    </p>
+  </section>
+
+  <section class="max-w-4xl mx-auto px-4 sm:px-6 pb-20">
+    <div class="space-y-6">
+      {countByLevel.map(f => (
+        <div class="bg-coal-700/30 rounded-2xl border overflow-hidden transition-all hover:shadow-lg" style={`border-color: ${f.color}20`}>
+          <div class="p-6 sm:p-8">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">{'🔥'.repeat(f.level)}</span>
+                <div>
+                  <p class="font-mono text-sm font-semibold tracking-wider" style={`color: ${f.color}`}>
+                    FLAME {f.level}
+                  </p>
+                  <h2 class="font-display font-bold text-2xl text-coal-50">{f.name}</h2>
+                </div>
+              </div>
+              <div class="sm:ml-auto text-right">
+                <p class="font-mono text-lg font-semibold" style={`color: ${f.color}`}>{f.scovilleRange}</p>
+                <p class="text-xs text-coal-200">{f.count} {f.count === 1 ? 'Rezept' : 'Rezepte'}</p>
+              </div>
+            </div>
+
+            <p class="text-coal-200 leading-relaxed mb-4">{f.description}</p>
+
+            <div class="flex flex-wrap gap-2 mb-4">
+              {f.chilis.map(chili => (
+                <span class="text-xs font-mono px-3 py-1 rounded-full border" style={`border-color: ${f.color}30; color: ${f.color}`}>
+                  {chili}
+                </span>
+              ))}
+            </div>
+
+            <a href={`/rezepte?flame=${f.level}`} class="inline-flex items-center gap-1 text-sm font-medium transition-colors hover:underline" style={`color: ${f.color}`}>
+              Flame-{f.level}-Rezepte ansehen
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+
+          {/* Heat bar */}
+          <div class="h-1" style={`background: linear-gradient(90deg, transparent, ${f.color}, transparent)`}></div>
+        </div>
+      ))}
+    </div>
+  </section>
+</Base>

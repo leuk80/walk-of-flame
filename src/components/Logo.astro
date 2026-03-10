@@ -1,0 +1,20 @@
+---
+interface Props {
+  size?: 'sm' | 'md' | 'lg';
+  showTagline?: boolean;
+}
+const { size = 'md', showTagline = true } = Astro.props;
+const sizes = { sm: 'text-xl', md: 'text-3xl', lg: 'text-5xl' };
+const tagSizes = { sm: 'text-[8px] tracking-[4px]', md: 'text-[10px] tracking-[6px]', lg: 'text-xs tracking-[8px]' };
+---
+
+<a href="/" class="group inline-flex flex-col items-center gap-0.5 no-underline">
+  <span class:list={['font-display font-black text-flame-gradient tracking-[0.15em] transition-all duration-300 group-hover:animate-glow', sizes[size]]}>
+    WALK OF FLAME
+  </span>
+  {showTagline && (
+    <span class:list={['font-body font-light text-coal-200 uppercase', tagSizes[size]]}>
+      Chili &amp; Heat Blog
+    </span>
+  )}
+</a>

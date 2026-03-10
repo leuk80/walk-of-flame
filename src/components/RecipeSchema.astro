@@ -1,0 +1,70 @@
+---
+import { site } from '../data/config';
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  prepTime: string;
+  cookTime: string;
+  totalTime: string;
+  servings: number;
+  calories?: string;
+  category: string;
+  cuisine: string;
+  ingredients: { group?: string; items: string[] }[];
+  steps: { title?: string; text: string; tip?: string }[];
+  seoKeywords: string[];
+  publishDate: Date;
+  slug: string;
+}
+
+const props = Astro.props;
+
+// Convert "15 Min" -> "PT15M", "1.5 Std" -> "PT90M" etc.
+function toISO8601Duration(timeStr: string): string {
+  const str = timeStr.toLowerCase().trim();
+  // Handle "X Std" or "X.X Std"
+  const hMatch = str.match(/([\d.]+)\s*(?:std|stunde|h)/);
+  // Handle "X Min"
+  const mMatch = str.match(/(\d+)\s*(?:min|m)/);
+  let totalMinutes = 0;
+  if (hMatch) totalMinutes += parseFloat(hMatch[1]) * 60;
+  if (mMatch) totalMinutes += parseInt(mMatch[1]);
+  if (totalMinutes === 0) totalMinutes = 30; // fallback
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = totalMinutes % 60;
+  if (hours > 0 && mins > 0) return `PT${hours}H${mins}M`;
+  if (hours > 0) return `PT${hours}H`;
+  return `PT${mins}M`;
+}
+
+const allIngredients = props.ingredients.flatMap(g => g.items);
+const allSteps = props.steps.map((s, i) => ({
+  '@type': 'HowToStep',
+  name: s.title || `Schritt ${i + 1}`,
+  text: s.text,
+}));
+
+const schema = {
+  '@context': 'https://schema.org/',
+  '@type': 'Recipe',
+  name: props.title,
+  description: props.description,
+  image: props.image ? [`${site.url}${props.image}`] : [],
+  author: { '@type': 'Organization', name: site.name, url: site.url },
+  datePublished: props.publishDate.toISOString().split('T')[0],
+  prepTime: toISO8601Duration(props.prepTime),
+  cookTime: toISO8601Duration(props.cookTime),
+  totalTime: toISO8601Duration(props.totalTime),
+  recipeYield: `${props.servings} Portionen`,
+  recipeCategory: props.category,
+  recipeCuisine: props.cuisine,
+  keywords: props.seoKeywords.join(', '),
+  recipeIngredient: allIngredients,
+  recipeInstructions: allSteps,
+  ...(props.calories ? { nutrition: { '@type': 'NutritionInformation', calories: props.calories } } : {}),
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

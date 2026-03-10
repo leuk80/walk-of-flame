@@ -1,0 +1,221 @@
+---
+import Base from '../../layouts/Base.astro';
+import FlameBadge from '../../components/FlameBadge.astro';
+import RecipeSchema from '../../components/RecipeSchema.astro';
+import RecipeCard from '../../components/RecipeCard.astro';
+import { getCollection } from 'astro:content';
+import { getFlameLevel } from '../../data/config';
+
+export async function getStaticPaths() {
+  const recipes = await getCollection('recipes');
+  return recipes.map(recipe => ({
+    params: { slug: recipe.slug },
+    props: { recipe },
+  }));
+}
+
+const { recipe } = Astro.props;
+const { Content } = await recipe.render();
+const d = recipe.data;
+const flame = getFlameLevel(d.flameLevel);
+
+// Related recipes
+const allRecipes = await getCollection('recipes');
+const related = allRecipes
+  .filter(r => r.slug !== recipe.slug)
+  .filter(r => r.data.flameLevel === d.flameLevel || r.data.category === d.category)
+  .slice(0, 3);
+---
+
+<Base title={d.title} description={d.description} type="article">
+  <RecipeSchema
+    title={d.title}
+    description={d.description}
+    image={d.image}
+    prepTime={d.prepTime}
+    cookTime={d.cookTime}
+    totalTime={d.totalTime}
+    servings={d.servings}
+    calories={d.calories}
+    category={d.category}
+    cuisine={d.cuisine}
+    ingredients={d.ingredients}
+    steps={d.steps}
+    seoKeywords={d.seoKeywords}
+    publishDate={d.publishDate}
+    slug={recipe.slug}
+  />
+
+  <article class="max-w-4xl mx-auto px-4 sm:px-6 pt-8 pb-20">
+    {/* Breadcrumb */}
+    <nav class="text-xs text-coal-200 mb-6 flex items-center gap-2">
+      <a href="/" class="hover:text-flame-400 transition-colors">Start</a>
+      <span>/</span>
+      <a href="/rezepte" class="hover:text-flame-400 transition-colors">Rezepte</a>
+      <span>/</span>
+      <span class="text-coal-100">{d.title}</span>
+    </nav>
+
+    {/* Header */}
+    <header class="mb-10">
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <FlameBadge level={d.flameLevel} showName={true} size="lg" />
+        <span class="font-mono text-xs text-coal-200">{d.category}</span>
+        {d.cuisine !== 'International' && <span class="font-mono text-xs text-coal-200">• {d.cuisine}</span>}
+      </div>
+
+      <h1 class="font-display font-black text-4xl sm:text-5xl text-coal-50 leading-tight mb-4">
+        {d.title}
+      </h1>
+
+      <p class="text-lg text-coal-200 leading-relaxed max-w-2xl">
+        {d.description}
+      </p>
+
+      {/* Meta bar */}
+      <div class="flex flex-wrap gap-6 mt-6 py-4 border-t border-b border-coal-600/20">
+        <div class="text-center">
+          <p class="font-mono text-xs text-coal-200 mb-1">Vorbereitung</p>
+          <p class="font-body font-semibold text-coal-50">{d.prepTime}</p>
+        </div>
+        <div class="text-center">
+          <p class="font-mono text-xs text-coal-200 mb-1">Kochzeit</p>
+          <p class="font-body font-semibold text-coal-50">{d.cookTime}</p>
+        </div>
+        <div class="text-center">
+          <p class="font-mono text-xs text-coal-200 mb-1">Gesamt</p>
+          <p class="font-body font-semibold text-flame-400">{d.totalTime}</p>
+        </div>
+        <div class="text-center">
+          <p class="font-mono text-xs text-coal-200 mb-1">Portionen</p>
+          <p class="font-body font-semibold text-coal-50">{d.servings}</p>
+        </div>
+        <div class="text-center">
+          <p class="font-mono text-xs text-coal-200 mb-1">Scoville</p>
+          <p class="font-mono font-semibold" style={`color: ${flame.color}`}>{d.scoville}</p>
+        </div>
+      </div>
+    </header>
+
+    {/* Two-column layout */}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+      {/* Ingredients Sidebar */}
+      <aside class="lg:col-span-1">
+        <div class="sticky top-20 bg-coal-700/30 rounded-2xl border border-coal-600/20 p-6">
+          <h2 class="font-display font-bold text-xl text-coal-50 mb-4 flex items-center gap-2">
+            <span>🧂</span> Zutaten
+          </h2>
+
+          <div class="space-y-4" id="ingredient-list">
+            {d.ingredients.map(group => (
+              <div>
+                {group.group && (
+                  <p class="font-mono text-xs text-flame-400 tracking-wider uppercase mb-2">{group.group}</p>
+                )}
+                <ul class="space-y-1">
+                  {group.items.map((item, i) => (
+                    <li>
+                      <label class="ingredient-check">
+                        <input type="checkbox" class="mt-1 accent-flame-500 rounded" />
+                        <span class="text-sm text-coal-100 transition-all">{item}</span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          {/* Affiliate products */}
+          {d.affiliateProducts.length > 0 && (
+            <div class="mt-6 pt-4 border-t border-coal-600/20">
+              <p class="font-mono text-xs text-coal-200 tracking-wider uppercase mb-3">Empfohlene Produkte</p>
+              {d.affiliateProducts.map(product => (
+                <a
+                  href={product.url}
+                  target="_blank"
+                  rel="noopener sponsored"
+                  class="block bg-coal-800/50 rounded-lg p-3 mb-2 border border-coal-600/20 hover:border-flame-500/20 transition-all group"
+                >
+                  <p class="text-sm font-semibold text-coal-50 group-hover:text-flame-400 transition-colors">{product.name}</p>
+                  {product.description && <p class="text-xs text-coal-200 mt-1">{product.description}</p>}
+                  <span class="text-[10px] text-coal-200 mt-1 block">Affiliate-Link *</span>
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      </aside>
+
+      {/* Steps */}
+      <div class="lg:col-span-2">
+        <h2 class="font-display font-bold text-2xl text-coal-50 mb-6 flex items-center gap-2">
+          <span>👨‍🍳</span> Zubereitung
+        </h2>
+
+        <ol class="space-y-6">
+          {d.steps.map((step, i) => (
+            <li class="flex gap-4">
+              <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-flame-700 to-flame-500 flex items-center justify-center font-mono text-sm font-bold text-white">
+                {i + 1}
+              </div>
+              <div class="flex-1 pt-1">
+                {step.title && (
+                  <h3 class="font-display font-bold text-lg text-coal-50 mb-2">{step.title}</h3>
+                )}
+                <p class="text-coal-100 leading-relaxed">{step.text}</p>
+                {step.tip && (
+                  <div class="mt-3 bg-flame-500/5 border border-flame-500/20 rounded-lg p-3 flex items-start gap-2">
+                    <span class="text-sm">💡</span>
+                    <p class="text-sm text-flame-300 italic">{step.tip}</p>
+                  </div>
+                )}
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        {/* Optional MDX body content */}
+        <div class="mt-10 prose prose-invert prose-orange max-w-none">
+          <Content />
+        </div>
+
+        {/* Tags */}
+        {d.tags.length > 0 && (
+          <div class="mt-10 pt-6 border-t border-coal-600/20">
+            <div class="flex flex-wrap gap-2">
+              {d.tags.map(tag => (
+                <span class="text-xs bg-coal-700/50 text-coal-200 px-3 py-1 rounded-full border border-coal-600/20">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+
+    {/* Related Recipes */}
+    {related.length > 0 && (
+      <section class="mt-20">
+        <div class="flame-divider mb-10"></div>
+        <h2 class="font-display font-bold text-2xl text-coal-50 mb-6">Das könnte dir auch schmecken</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {related.map(r => (
+            <RecipeCard
+              title={r.data.title}
+              description={r.data.description}
+              flameLevel={r.data.flameLevel}
+              slug={r.slug}
+              totalTime={r.data.totalTime}
+              servings={r.data.servings}
+              scoville={r.data.scoville}
+              category={r.data.category}
+              image={r.data.image}
+            />
+          ))}
+        </div>
+      </section>
+    )}
+  </article>
+</Base>

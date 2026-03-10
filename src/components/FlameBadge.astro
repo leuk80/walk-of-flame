@@ -1,0 +1,23 @@
+---
+import { getFlameLevel, getFlameEmoji } from '../data/config';
+
+interface Props {
+  level: number;
+  showName?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+}
+const { level, showName = true, size = 'md' } = Astro.props;
+const flame = getFlameLevel(level);
+const emoji = getFlameEmoji(level);
+const sizeClasses = {
+  sm: 'text-[10px] px-2 py-0.5',
+  md: 'text-xs px-3 py-1',
+  lg: 'text-sm px-4 py-1.5',
+};
+---
+
+<span class:list={[`flame-badge flame-badge-${level}`, sizeClasses[size]]}>
+  <span>{'🔥'.repeat(level)}</span>
+  <span>Flame {level}</span>
+  {showName && <span class="hidden sm:inline">– {flame.name}</span>}
+</span>

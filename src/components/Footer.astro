@@ -1,0 +1,40 @@
+---
+import { site } from '../data/config';
+---
+
+<footer class="border-t border-coal-600/20 mt-24">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-16">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+      <div>
+        <p class="font-display font-bold text-xl text-flame-gradient mb-3">WALK OF FLAME</p>
+        <p class="text-sm text-coal-200 leading-relaxed">{site.description}</p>
+        <p class="text-sm text-flame-500 italic mt-3 font-display">&bdquo;{site.claim}&ldquo;</p>
+      </div>
+      <div>
+        <p class="font-mono text-xs text-coal-200 tracking-wider uppercase mb-4">Navigation</p>
+        <div class="flex flex-col gap-2">
+          <a href="/rezepte" class="text-sm text-coal-200 hover:text-flame-400 transition-colors">Alle Rezepte</a>
+          <a href="/flame-levels" class="text-sm text-coal-200 hover:text-flame-400 transition-colors">Flame Levels</a>
+          <a href="/ueber" class="text-sm text-coal-200 hover:text-flame-400 transition-colors">Über Walk of Flame</a>
+        </div>
+      </div>
+      <div>
+        <p class="font-mono text-xs text-coal-200 tracking-wider uppercase mb-4">Social Media</p>
+        <div class="flex flex-col gap-2">
+          <a href={site.social.instagram} class="text-sm text-coal-200 hover:text-flame-400 transition-colors" target="_blank" rel="noopener">Instagram</a>
+          <a href={site.social.tiktok} class="text-sm text-coal-200 hover:text-flame-400 transition-colors" target="_blank" rel="noopener">TikTok</a>
+          <a href={site.social.youtube} class="text-sm text-coal-200 hover:text-flame-400 transition-colors" target="_blank" rel="noopener">YouTube</a>
+          <a href={site.social.pinterest} class="text-sm text-coal-200 hover:text-flame-400 transition-colors" target="_blank" rel="noopener">Pinterest</a>
+        </div>
+      </div>
+    </div>
+    <div class="flame-divider my-8"></div>
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-coal-200">
+      <p>&copy; {new Date().getFullYear()} Walk of Flame. Alle Rechte vorbehalten.</p>
+      <div class="flex gap-4">
+        <a href="/impressum" class="hover:text-flame-400 transition-colors">Impressum</a>
+        <a href="/datenschutz" class="hover:text-flame-400 transition-colors">Datenschutz</a>
+      </div>
+    </div>
+  </div>
+</footer>

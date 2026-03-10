@@ -1,0 +1,128 @@
+---
+import Base from '../layouts/Base.astro';
+import Logo from '../components/Logo.astro';
+import FlameBadge from '../components/FlameBadge.astro';
+import RecipeCard from '../components/RecipeCard.astro';
+import { getCollection } from 'astro:content';
+import { flameLevels, site } from '../data/config';
+
+const allRecipes = await getCollection('recipes');
+const latestRecipes = allRecipes
+  .sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf())
+  .slice(0, 6);
+---
+
+<Base>
+  {/* ── HERO ── */}
+  <section class="relative overflow-hidden glow-bg">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 pt-24 pb-20 text-center relative z-10">
+      <div class="mb-8">
+        <Logo size="lg" />
+      </div>
+
+      <p class="font-body text-lg sm:text-xl text-coal-100 max-w-2xl mx-auto leading-relaxed mb-4">
+        Der Weg zur perfekten Schärfe.<br />
+        Von mildem Kick bis zur absoluten Flame-Stufe.
+      </p>
+
+      <p class="font-display text-flame-500 italic text-lg mb-10">
+        &bdquo;Earn your heat.&ldquo;
+      </p>
+
+      <div class="flex flex-wrap justify-center gap-3 mb-12">
+        {flameLevels.map(f => (
+          <a href={`/rezepte?flame=${f.level}`} class="group">
+            <FlameBadge level={f.level} showName={true} size="md" />
+          </a>
+        ))}
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/rezepte" class="inline-flex items-center gap-2 bg-gradient-to-r from-flame-700 to-flame-500 text-white font-body font-semibold px-8 py-3 rounded-xl hover:from-flame-600 hover:to-flame-400 transition-all duration-300 shadow-lg shadow-flame-700/20">
+          Alle Rezepte entdecken
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+        </a>
+        <a href="/flame-levels" class="inline-flex items-center gap-2 border border-coal-600 text-coal-100 font-body font-medium px-8 py-3 rounded-xl hover:border-flame-500/40 hover:text-flame-400 transition-all duration-300">
+          Das Flame-System
+        </a>
+      </div>
+    </div>
+
+    {/* Decorative bottom gradient */}
+    <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-coal-900 to-transparent"></div>
+  </section>
+
+  {/* ── LATEST RECIPES ── */}
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 py-20">
+    <div class="flex items-end justify-between mb-10">
+      <div>
+        <p class="font-mono text-xs text-flame-500 tracking-wider uppercase mb-2">Neueste Rezepte</p>
+        <h2 class="font-display font-bold text-3xl text-coal-50">Frisch aus der Flammenküche</h2>
+      </div>
+      <a href="/rezepte" class="hidden sm:inline-flex text-sm text-coal-200 hover:text-flame-400 transition-colors items-center gap-1">
+        Alle ansehen
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 fade-in-group">
+      {latestRecipes.map(recipe => (
+        <RecipeCard
+          title={recipe.data.title}
+          description={recipe.data.description}
+          flameLevel={recipe.data.flameLevel}
+          slug={recipe.slug}
+          totalTime={recipe.data.totalTime}
+          servings={recipe.data.servings}
+          scoville={recipe.data.scoville}
+          category={recipe.data.category}
+          image={recipe.data.image}
+        />
+      ))}
+    </div>
+  </section>
+
+  {/* ── FLAME LEVELS TEASER ── */}
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 py-16">
+    <div class="flame-divider mb-16"></div>
+
+    <div class="text-center mb-12">
+      <p class="font-mono text-xs text-flame-500 tracking-wider uppercase mb-2">Das System</p>
+      <h2 class="font-display font-bold text-3xl text-coal-50 mb-4">Fünf Flame-Levels. Ein Weg.</h2>
+      <p class="text-coal-200 max-w-xl mx-auto">Jedes Rezept bekommt ein Level. Arbeite dich hoch – vom milden Einstieg bis zum absoluten Inferno.</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-5 gap-4">
+      {flameLevels.map(f => (
+        <a href={`/rezepte?flame=${f.level}`} class="group bg-coal-700/20 rounded-xl p-5 border border-coal-600/20 hover:border-opacity-60 transition-all duration-300 text-center" style={`border-color: ${f.color}20; --hover-color: ${f.color}40`}>
+          <div class="text-3xl mb-2">{'🔥'.repeat(f.level)}</div>
+          <p class="font-mono text-xs tracking-wider mb-1" style={`color: ${f.color}`}>FLAME {f.level}</p>
+          <p class="font-display font-bold text-sm text-coal-50">{f.name}</p>
+          <p class="font-mono text-[10px] text-coal-200 mt-2">{f.scovilleRange}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  {/* ── NEWSLETTER CTA ── */}
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 py-16">
+    <div class="bg-gradient-to-br from-flame-700/10 via-coal-800 to-coal-700/30 rounded-2xl p-8 sm:p-12 border border-flame-700/20 text-center">
+      <p class="text-4xl mb-4">🔥</p>
+      <h2 class="font-display font-bold text-2xl sm:text-3xl text-coal-50 mb-3">Werde Flammenläufer</h2>
+      <p class="text-coal-200 max-w-lg mx-auto mb-8">
+        Jede Woche neue Rezepte, Flame-Tipps und Chili-Wissen. Kostenlos. Kein Spam. Nur Feuer.
+      </p>
+      <form class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+        <input
+          type="email"
+          placeholder="deine@email.de"
+          class="flex-1 bg-coal-900/80 border border-coal-600 rounded-xl px-4 py-3 text-sm text-coal-50 placeholder-coal-200 focus:outline-none focus:border-flame-500 transition-colors"
+          required
+        />
+        <button type="submit" class="bg-gradient-to-r from-flame-700 to-flame-500 text-white font-semibold px-6 py-3 rounded-xl hover:from-flame-600 hover:to-flame-400 transition-all whitespace-nowrap">
+          Feuer frei 🔥
+        </button>
+      </form>
+    </div>
+  </section>
+</Base>

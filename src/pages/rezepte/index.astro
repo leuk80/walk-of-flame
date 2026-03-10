@@ -1,0 +1,100 @@
+---
+import Base from '../../layouts/Base.astro';
+import RecipeCard from '../../components/RecipeCard.astro';
+import FlameBadge from '../../components/FlameBadge.astro';
+import { getCollection } from 'astro:content';
+import { flameLevels, categories } from '../../data/config';
+
+const allRecipes = await getCollection('recipes');
+const sortedRecipes = allRecipes.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf());
+---
+
+<Base title="Alle Rezepte" description="Scharfe Rezepte von Flame 1 bis Flame 5. Finde dein nächstes Chili-Abenteuer.">
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 pt-12 pb-8">
+    <p class="font-mono text-xs text-flame-500 tracking-wider uppercase mb-2">Rezepte</p>
+    <h1 class="font-display font-bold text-4xl text-coal-50 mb-3">Alle Rezepte</h1>
+    <p class="text-coal-200 max-w-2xl">
+      Von mild bis infernal – {allRecipes.length} Rezepte für jeden Mut-Level.
+      Filter nach Flame-Level und finde dein nächstes Chili-Abenteuer.
+    </p>
+  </section>
+
+  {/* Flame Level Filter */}
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 pb-8">
+    <div class="flex flex-wrap gap-2" id="flame-filters">
+      <button data-flame="all" class="flame-filter-btn active font-mono text-xs px-4 py-2 rounded-full border border-coal-600 text-coal-100 hover:border-flame-500/40 transition-all">
+        Alle
+      </button>
+      {flameLevels.map(f => (
+        <button data-flame={f.level} class="flame-filter-btn font-mono text-xs px-4 py-2 rounded-full border transition-all" style={`border-color: ${f.color}30; color: ${f.color}`}>
+          {'🔥'.repeat(f.level)} Flame {f.level}
+        </button>
+      ))}
+    </div>
+  </section>
+
+  {/* Recipe Grid */}
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 pb-20">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 fade-in-group" id="recipe-grid">
+      {sortedRecipes.map(recipe => (
+        <div data-flame-level={recipe.data.flameLevel} class="recipe-item">
+          <RecipeCard
+            title={recipe.data.title}
+            description={recipe.data.description}
+            flameLevel={recipe.data.flameLevel}
+            slug={recipe.slug}
+            totalTime={recipe.data.totalTime}
+            servings={recipe.data.servings}
+            scoville={recipe.data.scoville}
+            category={recipe.data.category}
+            image={recipe.data.image}
+          />
+        </div>
+      ))}
+    </div>
+  </section>
+</Base>
+
+<script>
+  // Client-side flame level filtering
+  const buttons = document.querySelectorAll('.flame-filter-btn');
+  const items = document.querySelectorAll('.recipe-item');
+
+  // Check URL params on load
+  const params = new URLSearchParams(window.location.search);
+  const initialFlame = params.get('flame');
+
+  function filterBy(level: string) {
+    buttons.forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.querySelector(`[data-flame="${level}"]`);
+    activeBtn?.classList.add('active');
+
+    items.forEach(item => {
+      const el = item as HTMLElement;
+      if (level === 'all' || el.dataset.flameLevel === level) {
+        el.style.display = '';
+      } else {
+        el.style.display = 'none';
+      }
+    });
+  }
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const flame = (btn as HTMLElement).dataset.flame || 'all';
+      filterBy(flame);
+      // Update URL
+      const url = new URL(window.location.href);
+      if (flame === 'all') url.searchParams.delete('flame');
+      else url.searchParams.set('flame', flame);
+      history.replaceState(null, '', url);
+    });
+  });
+
+  if (initialFlame) filterBy(initialFlame);
+
+  // Style active button
+  const style = document.createElement('style');
+  style.textContent = `.flame-filter-btn.active { background: rgba(255,87,34,0.15); border-color: rgba(255,87,34,0.5) !important; color: #FF5722 !important; }`;
+  document.head.appendChild(style);
+</script>

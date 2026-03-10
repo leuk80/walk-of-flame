@@ -1,0 +1,2 @@
+# Redirect old patterns if needed
+/recipes/*  /rezepte/:splat  301
