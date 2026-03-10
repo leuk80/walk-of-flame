@@ -2,7 +2,7 @@ import { defineCollection, z } from 'astro:content';
 
 const recipes = defineCollection({
   type: 'content',
-  schema: z.object({
+  schema: ({ image }) => z.object({
     title: z.string(),
     description: z.string(),
     flameLevel: z.number().min(1).max(5),
@@ -31,7 +31,7 @@ const recipes = defineCollection({
     // SEO
     seoKeywords: z.array(z.string()).default([]),
     // Media
-    image: z.string().optional(),
+    image: image().optional(),
     imageAlt: z.string().optional(),
     // Taxonomy
     tags: z.array(z.string()).default([]),
