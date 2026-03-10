@@ -4,7 +4,7 @@ import { site } from '../data/config';
 interface Props {
   title: string;
   description: string;
-  image?: string;
+  imageSrc?: string;
   prepTime: string;
   cookTime: string;
   totalTime: string;
@@ -51,7 +51,7 @@ const schema = {
   '@type': 'Recipe',
   name: props.title,
   description: props.description,
-  image: props.image ? [`${site.url}${props.image}`] : [],
+  image: props.imageSrc ? [`${site.url}${props.imageSrc}`] : [],
   author: { '@type': 'Organization', name: site.name, url: site.url },
   datePublished: props.publishDate.toISOString().split('T')[0],
   prepTime: toISO8601Duration(props.prepTime),
